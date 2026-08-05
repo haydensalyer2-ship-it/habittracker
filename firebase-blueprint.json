@@ -1,0 +1,19 @@
+{
+  "entities": {
+    "user": {
+      "title": "User State",
+      "description": "User state data including daily logs and goals",
+      "type": "object",
+      "properties": {
+        "startDate": { "type": "string" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/user" },
+      "description": "User application state"
+    }
+  }
+}
+
