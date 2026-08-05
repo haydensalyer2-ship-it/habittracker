@@ -23,15 +23,15 @@ export function getXPForLevel(level: number): number {
 }
 
 export function getRankTitle(level: number): { title: string; badgeColor: string; borderColor: string } {
-  if (level >= 100) return { title: 'PURE GREATNESS', badgeColor: 'bg-yellow-400 text-black', borderColor: 'border-yellow-400' };
-  if (level >= 75) return { title: 'MASTER MIND', badgeColor: 'bg-purple-500 text-white', borderColor: 'border-purple-500' };
-  if (level >= 50) return { title: 'TITAN OF INDUSTRY', badgeColor: 'bg-red-500 text-white', borderColor: 'border-red-500' };
-  if (level >= 30) return { title: 'APEX SAVAGE', badgeColor: 'bg-amber-500 text-black', borderColor: 'border-amber-500' };
-  if (level >= 20) return { title: 'UNSTOPPABLE', badgeColor: 'bg-emerald-400 text-black', borderColor: 'border-emerald-400' };
-  if (level >= 15) return { title: 'RELENTLESS', badgeColor: 'bg-blue-500 text-white', borderColor: 'border-blue-500' };
+  if (level >= 100) return { title: 'MYTHIC LOCK', badgeColor: 'bg-yellow-400 text-black', borderColor: 'border-yellow-400' };
+  if (level >= 75) return { title: 'COMMANDER', badgeColor: 'bg-purple-500 text-white', borderColor: 'border-purple-500' };
+  if (level >= 50) return { title: 'IRON MONK', badgeColor: 'bg-red-500 text-white', borderColor: 'border-red-500' };
+  if (level >= 30) return { title: 'DOPAMINE DETOXED', badgeColor: 'bg-amber-500 text-black', borderColor: 'border-amber-500' };
+  if (level >= 20) return { title: 'MISSION BUILDER', badgeColor: 'bg-emerald-400 text-black', borderColor: 'border-emerald-400' };
+  if (level >= 15) return { title: 'STREAK ENFORCER', badgeColor: 'bg-blue-500 text-white', borderColor: 'border-blue-500' };
   if (level >= 10) return { title: 'LOCKED IN', badgeColor: 'bg-brand-green text-black', borderColor: 'border-brand-green' };
-  if (level >= 5) return { title: 'DISCIPLINED', badgeColor: 'bg-cyan-500 text-black', borderColor: 'border-cyan-500' };
-  return { title: 'RECRUIT', badgeColor: 'bg-zinc-700 text-zinc-200', borderColor: 'border-zinc-600' };
+  if (level >= 5) return { title: 'REWIRED', badgeColor: 'bg-cyan-500 text-black', borderColor: 'border-cyan-500' };
+  return { title: 'DAY ONE', badgeColor: 'bg-zinc-700 text-zinc-200', borderColor: 'border-zinc-600' };
 }
 
 export function getActiveHabits(state: AppState): Habit[] {

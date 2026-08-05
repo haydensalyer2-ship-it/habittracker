@@ -3,23 +3,18 @@ import { useAppStore } from '../context/AppContext';
 import { format } from 'date-fns';
 import { getStats } from '../lib/stats';
 import { calculateGamification } from '../lib/gamification';
-import { Target, Flame, Activity, TrendingUp, CheckCircle, Bell, BellRing, Zap, Clock, ShieldCheck, Award, Sparkles } from 'lucide-react';
+import { Target, Flame, Activity, CheckCircle, Bell, BellRing, Clock, ShieldCheck, Sparkles, Skull, Dumbbell, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import JourneyMap from '../components/JourneyMap';
 import { requestNotificationPermission, showNotification } from '../lib/notifications';
 import { cn } from '../lib/utils';
 
 const QUOTES = [
-  { text: "There's no talent here, this is hard work. This is an obsession.", author: "Conor McGregor" },
-  { text: "We're not here to take part, we're here to take over.", author: "Conor McGregor" },
-  { text: "I visualized the exact outcome I wanted, and I worked backwards from there.", author: "Sean O'Malley" },
-  { text: "What you think, you create. What you feel, you attract. What you imagine, you become.", author: "Law of Attraction" },
-  { text: "I am cocky in prediction. I am confident in preparation.", author: "Conor McGregor" },
-  { text: "I knew I was going to be the world champion. I saw it, I visualized it, I put the work in.", author: "Sean O'Malley" },
-  { text: "Ask, believe, receive. The universe responds to your frequency.", author: "Law of Attraction" },
-  { text: "I don't just see the win, I see exactly how it happens.", author: "Sean O'Malley" },
-  { text: "Doubt is only removed by action. If you're not working then that's where doubt comes in.", author: "Conor McGregor" },
-  { text: "Thoughts become things. If you see it in your mind, you will hold it in your hand.", author: "Bob Proctor" }
+  { text: 'Urges are not orders. They are waves. Hold position.', author: 'Lock In Protocol' },
+  { text: 'Every checked box is a vote for the man you are becoming.', author: 'Identity Ledger' },
+  { text: 'You do not need motivation. You need fewer exits.', author: 'Discipline Rule' },
+  { text: 'Cheap dopamine steals tomorrow. Earned dopamine builds it.', author: 'Rewire Doctrine' },
+  { text: 'If the day gets hard, make the next rep obvious.', author: 'No Zero Days' },
 ];
 
 export default function Dashboard() {
@@ -39,178 +34,112 @@ export default function Dashboard() {
   const handleEnableNotifications = async () => {
     const granted = await requestNotificationPermission();
     setNotificationsEnabled(granted);
-    if (granted) {
-      showNotification();
-    }
+    if (granted) showNotification();
   };
-  
-  const quoteIndex = stats ? (stats.currentDay % QUOTES.length) : 0;
-  const quote = QUOTES[quoteIndex];
 
   if (!stats) return null;
 
   const challengeLength = state.challengeLength || 90;
   const progress = Math.min((stats.currentDay / challengeLength) * 100, 100);
-
-  // Streak multiplier display
-  let streakMultiplier = '1.0x';
-  if (stats.streak >= 90) streakMultiplier = '3.0x';
-  else if (stats.streak >= 60) streakMultiplier = '2.5x';
-  else if (stats.streak >= 30) streakMultiplier = '2.0x';
-  else if (stats.streak >= 14) streakMultiplier = '1.5x';
-  else if (stats.streak >= 7) streakMultiplier = '1.25x';
-  else if (stats.streak >= 3) streakMultiplier = '1.1x';
+  const quote = QUOTES[stats.currentDay % QUOTES.length];
+  const todaysLog = state.dailyLogs[todayStr];
+  const lockedToday = !!todaysLog;
+  const streakMultiplier = stats.streak >= 90 ? '3.0x' : stats.streak >= 60 ? '2.5x' : stats.streak >= 30 ? '2.0x' : stats.streak >= 14 ? '1.5x' : stats.streak >= 7 ? '1.25x' : stats.streak >= 3 ? '1.1x' : '1.0x';
 
   return (
-    <div className="p-4 space-y-5 max-w-md mx-auto pt-6 pb-24">
-      {/* Header with Title & Notification */}
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="text-[10px] text-brand-green font-black uppercase tracking-widest mb-0.5">
-            {challengeLength}-Day Lock In Challenge
-          </p>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-white">Dashboard</h1>
-          <p className="text-xs text-brand-muted font-bold uppercase tracking-widest">{format(new Date(), 'EEEE, MMM d')}</p>
+    <div className="min-h-[100dvh] bg-[radial-gradient(circle_at_top,#102819_0%,#070707_45%,#020202_100%)] pb-24">
+      <div className="max-w-md mx-auto p-4 pt-6 space-y-5">
+        <div className="flex justify-between items-start">
+          <div>
+            <p className="text-[10px] text-brand-green font-black uppercase tracking-[0.32em] mb-1">Lock In OS</p>
+            <h1 className="text-3xl font-black uppercase tracking-tighter text-white">Command Center</h1>
+            <p className="text-xs text-brand-muted font-bold uppercase tracking-widest">{format(new Date(), 'EEEE, MMM d')} · Day {stats.currentDay}</p>
+          </div>
+          <button
+            onClick={handleEnableNotifications}
+            className={cn('p-3 rounded-2xl border transition-all', notificationsEnabled ? 'bg-brand-green text-black border-brand-green' : 'bg-black/70 border-brand-border text-brand-muted hover:text-white')}
+            title={notificationsEnabled ? 'Reminders active' : 'Enable reminders'}
+          >
+            {notificationsEnabled ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+          </button>
         </div>
-        <button 
-          onClick={handleEnableNotifications}
-          className={cn(
-            "p-2.5 rounded-full border transition-all",
-            notificationsEnabled
-              ? "bg-brand-green/10 border-brand-green text-brand-green"
-              : "bg-black border-brand-border text-brand-muted hover:text-white"
-          )}
-          title={notificationsEnabled ? "Notifications active" : "Enable reminders"}
-        >
-          {notificationsEnabled ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
-        </button>
-      </div>
 
-      {/* Level & XP Player Banner */}
-      <div className="bg-brand-card border border-brand-border rounded-xl p-4 space-y-3 relative overflow-hidden">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "w-11 h-11 rounded-lg border-2 flex items-center justify-center font-black text-lg shadow-lg shrink-0",
-              gamification.rankBadgeColor,
-              gamification.rankBorderColor
-            )}>
-              {gamification.level}
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black uppercase tracking-wider text-white">
-                  {gamification.levelTitle}
-                </span>
-                <Sparkles className="w-3.5 h-3.5 text-brand-green" />
+        <div className="rounded-[2rem] border border-brand-green/25 bg-black/80 p-5 relative overflow-hidden shadow-2xl shadow-brand-green/10">
+          <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-brand-green/20 blur-3xl" />
+          <div className="relative space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-[0.28em] text-brand-green">Current rank</span>
+                <div className="mt-1 flex items-center gap-2">
+                  <div className={cn('w-12 h-12 rounded-2xl border-2 flex items-center justify-center font-black text-xl', gamification.rankBadgeColor, gamification.rankBorderColor)}>{gamification.level}</div>
+                  <div>
+                    <h2 className="text-xl font-black uppercase leading-none">{gamification.levelTitle}</h2>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-brand-muted">{gamification.totalXP.toLocaleString()} XP earned</p>
+                  </div>
+                </div>
               </div>
-              <span className="text-[10px] text-brand-muted font-bold uppercase tracking-widest block">
-                {gamification.totalXP.toLocaleString()} TOTAL XP
-              </span>
+              <div className="rounded-full border border-brand-green/30 bg-brand-green/10 px-3 py-1 text-[10px] font-black text-brand-green">{streakMultiplier} BOOST</div>
+            </div>
+            <div className="space-y-2">
+              <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-brand-muted"><span>Level {gamification.level}</span><span>{gamification.xpInCurrentLevel}/{gamification.xpRequiredForNextLevel} XP</span></div>
+              <div className="h-3 rounded-full border border-brand-border bg-black overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-brand-green via-lime-300 to-white transition-all duration-700" style={{ width: `${gamification.progressPercent}%` }} /></div>
             </div>
           </div>
+        </div>
 
-          <div className="text-right">
-            <span className="text-[10px] text-brand-green font-extrabold uppercase tracking-widest bg-brand-green/10 px-2 py-1 rounded border border-brand-green/20">
-              {streakMultiplier} XP BOOST
-            </span>
+        <div className="grid grid-cols-[1.2fr_0.8fr] gap-3">
+          <div className="rounded-[2rem] border border-brand-border bg-brand-card p-5 text-center relative overflow-hidden">
+            <div className="absolute left-1/2 top-8 h-24 w-24 -translate-x-1/2 rounded-full bg-orange-500/20 blur-2xl" />
+            <Flame className="relative mx-auto mb-2 h-14 w-14 text-orange-500 drop-shadow-[0_0_18px_rgba(249,115,22,0.45)]" />
+            <div className="text-7xl font-black tracking-tighter leading-none">{stats.streak}</div>
+            <p className="text-xs font-black uppercase tracking-[0.28em] text-brand-green">Day streak</p>
+            <div className="mt-4 h-2 rounded-full bg-black border border-brand-border overflow-hidden"><div className="h-full bg-brand-green" style={{ width: `${progress}%` }} /></div>
+          </div>
+          <div className="space-y-3">
+            <button onClick={() => navigate('/check-in')} className="w-full h-[calc(50%-0.375rem)] rounded-[1.5rem] bg-brand-green p-4 text-left text-black shadow-lg shadow-brand-green/10 active:scale-95 transition-all">
+              <CheckCircle className="h-6 w-6 mb-2" />
+              <span className="block text-lg font-black uppercase leading-none">Daily Log</span>
+              <span className="text-[10px] font-black uppercase opacity-70">{lockedToday ? 'Update proof' : 'Earn XP now'}</span>
+            </button>
+            <button onClick={() => navigate('/focus')} className="w-full h-[calc(50%-0.375rem)] rounded-[1.5rem] border border-brand-green/40 bg-black p-4 text-left text-white active:scale-95 transition-all">
+              <Clock className="h-6 w-6 mb-2 text-brand-green" />
+              <span className="block text-lg font-black uppercase leading-none">Focus</span>
+              <span className="text-[10px] font-black uppercase text-brand-green">Phone-free run</span>
+            </button>
           </div>
         </div>
 
-        {/* Level Progress Bar */}
-        <div className="space-y-1">
-          <div className="flex justify-between text-[9px] font-extrabold text-brand-muted uppercase tracking-widest">
-            <span>Level {gamification.level}</span>
-            <span>{gamification.xpInCurrentLevel} / {gamification.xpRequiredForNextLevel} XP</span>
-            <span>Level {gamification.level + 1}</span>
+        <div className="grid grid-cols-3 gap-2">
+          {[{ icon: Target, value: stats.todayScore, label: 'Score' }, { icon: Activity, value: stats.weeklyAvg, label: 'Week Avg' }, { icon: ShieldCheck, value: stats.totalCleanDays, label: 'Clean Days' }].map(({ icon: Icon, value, label }) => (
+            <div key={label} className="rounded-2xl border border-brand-border bg-brand-card p-3 text-center">
+              <Icon className="mx-auto mb-1 h-5 w-5 text-brand-green" />
+              <div className="text-2xl font-black">{value}</div>
+              <div className="text-[9px] font-black uppercase tracking-widest text-brand-muted">{label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-[2rem] border border-brand-border bg-brand-card p-4 space-y-3">
+          <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.24em] text-white"><Skull className="h-4 w-4 text-red-400" /> Today’s enemy list</h3>
+          <div className="grid grid-cols-2 gap-2 text-[10px] font-black uppercase tracking-wider">
+            <span className="rounded-xl bg-red-500/10 border border-red-500/20 p-2 text-red-200">Porn / PMO</span>
+            <span className="rounded-xl bg-red-500/10 border border-red-500/20 p-2 text-red-200">Doomscrolling</span>
+            <span className="rounded-xl bg-red-500/10 border border-red-500/20 p-2 text-red-200">Weed / Nicotine</span>
+            <span className="rounded-xl bg-red-500/10 border border-red-500/20 p-2 text-red-200">Gambling / Binge</span>
           </div>
-          <div className="w-full h-2 bg-black rounded-full overflow-hidden border border-brand-border/50">
-            <div 
-              className="h-full bg-gradient-to-r from-emerald-500 to-brand-green transition-all duration-700 rounded-full"
-              style={{ width: `${gamification.progressPercent}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Main Streak Card */}
-      <div className="bg-brand-card border border-brand-border rounded-xl relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-brand-border">
-          <div 
-            className="h-full bg-brand-green transition-all duration-1000 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <div className="p-7 text-center flex flex-col items-center justify-center">
-          <div className="relative mb-2">
-            <div className="absolute inset-0 bg-orange-500 blur-[25px] opacity-25 rounded-full" />
-            <Flame className="w-16 h-16 text-orange-500 relative z-10 drop-shadow-[0_0_15px_rgba(249,115,22,0.5)] animate-pulse" strokeWidth={1.5} />
-          </div>
-          <h2 className="text-7xl font-black text-white leading-none tracking-tighter mb-1">{stats.streak}</h2>
-          <span className="text-xs text-brand-green font-bold uppercase tracking-widest">Day Streak</span>
-        </div>
-        <div className="bg-black/40 p-3 text-center border-t border-brand-border flex justify-between items-center px-4">
-          <span className="text-brand-muted text-[10px] font-bold tracking-widest uppercase">
-            Day {stats.currentDay} of {challengeLength}
-          </span>
-          <span className="text-brand-green text-[10px] font-bold tracking-widest uppercase">
-            No Zero Days
-          </span>
-        </div>
-      </div>
-
-      <JourneyMap currentDay={stats.currentDay} />
-
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-2 gap-2">
-        <div className="bg-brand-card border border-brand-border rounded-lg p-3.5 flex flex-col items-center justify-center text-center">
-          <Target className="w-5 h-5 text-brand-green mb-1.5" />
-          <span className="text-2xl font-black text-white">{stats.todayScore}</span>
-          <span className="text-[10px] text-brand-muted font-bold uppercase tracking-wider">Today Score</span>
         </div>
 
-        <div className="bg-brand-card border border-brand-border rounded-lg p-3.5 flex flex-col items-center justify-center text-center">
-          <Activity className="w-5 h-5 text-blue-400 mb-1.5" />
-          <span className="text-2xl font-black text-white">{stats.weeklyAvg}</span>
-          <span className="text-[10px] text-brand-muted font-bold uppercase tracking-wider">Weekly Avg</span>
+        <JourneyMap currentDay={stats.currentDay} />
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl border border-brand-border bg-black p-4"><Dumbbell className="h-5 w-5 text-brand-green mb-2" /><p className="text-xs font-black uppercase tracking-widest">Body gets hard</p><p className="text-[10px] text-brand-muted font-bold mt-1">Train, sleep, steps, protein.</p></div>
+          <div className="rounded-2xl border border-brand-border bg-black p-4"><Brain className="h-5 w-5 text-brand-green mb-2" /><p className="text-xs font-black uppercase tracking-widest">Mind gets quiet</p><p className="text-[10px] text-brand-muted font-bold mt-1">Journal, read, build skill.</p></div>
         </div>
 
-        <div className="bg-brand-card border border-brand-border rounded-lg p-3.5 flex flex-col items-center justify-center text-center">
-          <CheckCircle className="w-5 h-5 text-purple-400 mb-1.5" />
-          <span className="text-2xl font-black text-white">{stats.totalCleanDays}</span>
-          <span className="text-[10px] text-brand-muted font-bold uppercase tracking-wider">Clean Days</span>
-        </div>
-
-        <div 
-          onClick={() => navigate('/focus')}
-          className="bg-brand-card border border-brand-green/50 hover:border-brand-green rounded-lg p-3.5 flex flex-col items-center justify-center text-center cursor-pointer transition-colors group"
-        >
-          <Clock className="w-5 h-5 text-brand-green mb-1.5 group-hover:scale-110 transition-transform" />
-          <span className="text-lg font-black uppercase text-white tracking-tight">Lock In</span>
-          <span className="text-[10px] text-brand-green font-bold uppercase tracking-wider">Focus Mode</span>
-        </div>
-      </div>
-
-      {/* Action Banner: Check-In */}
-      <div 
-        onClick={() => navigate('/check-in')}
-        className="bg-brand-green text-black rounded-xl p-4 flex items-center justify-between cursor-pointer hover:bg-green-400 transition-all active:scale-95 shadow-lg shadow-brand-green/10"
-      >
-        <div className="flex flex-col">
-          <span className="text-xs font-black uppercase tracking-widest opacity-80">Daily Protocol</span>
-          <span className="text-xl font-black uppercase tracking-tight">Execute Daily Check-In</span>
-        </div>
-        <div className="w-10 h-10 rounded-full bg-black text-brand-green flex items-center justify-center font-black">
-          <TrendingUp className="w-5 h-5" />
-        </div>
-      </div>
-
-      {/* Quote Banner */}
-      <div className="bg-brand-card border border-brand-border rounded-xl p-5 relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-1.5 h-full bg-brand-green" />
-        <div className="pl-2">
-          <p className="text-base font-bold italic text-white mb-2 leading-snug">"{quote.text}"</p>
-          <p className="text-[10px] font-black uppercase tracking-widest text-brand-green">— {quote.author}</p>
+        <div className="rounded-[2rem] border border-brand-green/25 bg-brand-green/10 p-5 relative overflow-hidden">
+          <Sparkles className="absolute right-4 top-4 h-5 w-5 text-brand-green" />
+          <p className="pr-6 text-lg font-black italic leading-snug text-white">“{quote.text}”</p>
+          <p className="mt-3 text-[10px] font-black uppercase tracking-[0.28em] text-brand-green">— {quote.author}</p>
         </div>
       </div>
     </div>

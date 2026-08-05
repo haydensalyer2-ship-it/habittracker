@@ -1,6 +1,6 @@
 {
-  "name": "90 Day Run-Up",
-  "description": "A gamified daily discipline, habit tracking, deep work focus timer, and achievements platform to lock in and gamify greatness.",
+  "name": "Lock In OS",
+  "description": "A gamified dopamine detox and habit-building platform for young men cutting bad habits, earning XP, and building proof through daily discipline.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

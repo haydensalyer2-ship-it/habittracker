@@ -6,12 +6,12 @@ import { useAuth } from '../context/AuthContext';
 export default function Layout() {
   const { signOut } = useAuth();
   const navItems = [
-    { to: '/', icon: Home, label: 'Dash' },
-    { to: '/check-in', icon: CheckSquare, label: 'Log' },
+    { to: '/', icon: Home, label: 'HQ' },
+    { to: '/check-in', icon: CheckSquare, label: 'Proof' },
     { to: '/focus', icon: Clock, label: 'Focus' },
-    { to: '/analytics', icon: BarChart2, label: 'Stats' },
+    { to: '/analytics', icon: BarChart2, label: 'Intel' },
     { to: '/goals', icon: Target, label: 'Goals' },
-    { to: '/achievements', icon: Award, label: 'Badges' },
+    { to: '/achievements', icon: Award, label: 'Ranks' },
   ];
 
   return (
