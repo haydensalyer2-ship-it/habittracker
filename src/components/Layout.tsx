@@ -1,17 +1,15 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Home, CheckSquare, Clock, BarChart2, Target, Award, LogOut, Briefcase } from 'lucide-react';
+import { Home, CheckSquare, Clock, Target, LogOut } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useAuth } from '../context/AuthContext';
 
 export default function Layout() {
   const { signOut } = useAuth();
   const navItems = [
-    { to: '/', icon: Home, label: 'HQ' },
-    { to: '/check-in', icon: CheckSquare, label: 'Proof' },
+    { to: '/', icon: Home, label: 'Home' },
+    { to: '/check-in', icon: CheckSquare, label: 'Log' },
     { to: '/focus', icon: Clock, label: 'Focus' },
-    { to: '/analytics', icon: BarChart2, label: 'Intel' },
     { to: '/goals', icon: Target, label: 'Goals' },
-    { to: '/achievements', icon: Award, label: 'Ranks' },
   ];
 
   return (
