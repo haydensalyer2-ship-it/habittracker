@@ -1,10 +1,10 @@
 {
-  "name": "90-Day Run Up",
-  "short_name": "90 Day Run",
+  "name": "Lock In OS",
+  "short_name": "Lock In",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#000000",
+  "background_color": "#020202",
+  "theme_color": "#39ff88",
   "icons": [
     {
       "src": "icon.svg",

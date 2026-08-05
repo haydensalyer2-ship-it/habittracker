@@ -68,8 +68,8 @@ export default function DailyCheckIn() {
       {/* Header & Protocol Button */}
       <div className="flex justify-between items-end pb-2 border-b border-brand-border">
         <div>
-          <h1 className="text-2xl font-black uppercase tracking-tight text-white">Check-In</h1>
-          <p className="text-[10px] text-brand-muted font-bold tracking-widest uppercase">Daily Protocol Execution</p>
+          <h1 className="text-2xl font-black uppercase tracking-tight text-white">Battle Log</h1>
+          <p className="text-[10px] text-brand-muted font-bold tracking-widest uppercase">Proof-of-work ledger</p>
         </div>
 
         <div className="flex items-center gap-3">
@@ -99,12 +99,12 @@ export default function DailyCheckIn() {
       <div className="border border-brand-border rounded-xl bg-brand-card overflow-hidden shadow-lg">
         {activeHabits.length === 0 ? (
           <div className="p-6 text-center space-y-3">
-            <p className="text-xs text-brand-muted font-semibold">No habits selected for your protocol.</p>
+            <p className="text-xs text-brand-muted font-semibold">No quests selected for your protocol.</p>
             <button
               onClick={() => setIsModalOpen(true)}
               className="py-2 px-4 bg-brand-green text-black font-black uppercase tracking-wider text-xs rounded"
             >
-              Set Up Protocol
+              Build Protocol
             </button>
           </div>
         ) : (
@@ -146,37 +146,37 @@ export default function DailyCheckIn() {
         )}
       </div>
 
-      {/* End of Day Reflection */}
+      {/* Nightly Debrief */}
       <div className="space-y-3 pt-2">
-        <h3 className="font-black uppercase tracking-wide text-lg text-white">End of Day Reflection</h3>
+        <h3 className="font-black uppercase tracking-wide text-lg text-white">Nightly Debrief</h3>
         
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">Wins Today</label>
+          <label className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">Wins / Proof</label>
           <textarea 
             value={log.notes.wins}
             onChange={(e) => handleNoteChange('wins', e.target.value)}
             className="w-full bg-brand-card border border-brand-border rounded-lg p-3 text-xs text-white focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none min-h-[70px]"
-            placeholder="What went well today?"
+            placeholder="What did you do that your future self respects?"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">Triggers / Roadblocks</label>
+          <label className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">Urges / Triggers</label>
           <textarea 
             value={log.notes.triggers}
             onChange={(e) => handleNoteChange('triggers', e.target.value)}
             className="w-full bg-brand-card border border-brand-border rounded-lg p-3 text-xs text-white focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none min-h-[70px]"
-            placeholder="What almost threw you off focus?"
+            placeholder="What tried to pull you back into cheap dopamine?"
           />
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">Fix for Tomorrow</label>
+          <label className="text-[10px] font-bold text-brand-muted uppercase tracking-widest">Countermove for Tomorrow</label>
           <textarea 
             value={log.notes.fix}
             onChange={(e) => handleNoteChange('fix', e.target.value)}
             className="w-full bg-brand-card border border-brand-border rounded-lg p-3 text-xs text-white focus:border-brand-green focus:ring-1 focus:ring-brand-green outline-none min-h-[70px]"
-            placeholder="How will you execute better tomorrow?"
+            placeholder="What rule, block, or environment change keeps you locked in tomorrow?"
           />
         </div>
       </div>

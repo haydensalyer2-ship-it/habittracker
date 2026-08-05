@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-green: #22c55e;
+  --color-brand-green: #39ff88;
   --color-brand-dark: #09090b;
   --color-brand-card: #18181b;
   --color-brand-border: #27272a;
@@ -11,6 +11,6 @@
 
 @layer base {
   body {
-    @apply bg-brand-dark text-white antialiased selection:bg-brand-green selection:text-white;
+    @apply bg-brand-dark text-white antialiased selection:bg-brand-green selection:text-black;
   }
 }
