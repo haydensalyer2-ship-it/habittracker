@@ -8,40 +8,45 @@ export function getStats(state: AppState, todayStr: string) {
   const today = parseISO(todayStr);
   const currentDay = Math.max(1, differenceInDays(today, start) + 1);
 
+  const enabledHabits = (state.userHabits || []).filter(habit => habit.enabled);
+  const dailyTarget = enabledHabits.length;
+  const getCompletedCount = (dateKey: string) => {
+    const log = state.dailyLogs[dateKey];
+    if (!log) return 0;
+
+    if (dailyTarget > 0) {
+      return enabledHabits.filter(habit => log.tasks[habit.id]).length;
+    }
+
+    return Object.values(log.tasks || {}).filter(Boolean).length;
+  };
+  const isPerfectDay = (dateKey: string) => dailyTarget > 0 && getCompletedCount(dateKey) >= dailyTarget;
+
   // Calculate clean days & streak
   let streak = 0;
   let totalCleanDays = 0;
   
   // Daily score for today
-  const todayLog = state.dailyLogs[todayStr];
-  let todayScore = 0;
-  if (todayLog) {
-    todayScore = Object.values(todayLog.tasks).filter(Boolean).length;
-  }
+  const todayScore = getCompletedCount(todayStr);
 
-  // Calculate streak looking backwards
+  // Calculate perfect days completed in the current challenge window.
   for (let i = 0; i <= currentDay; i++) {
     const dStr = subDays(today, i).toISOString().split('T')[0];
-    const log = state.dailyLogs[dStr];
-    if (log) {
-      const score = Object.values(log.tasks).filter(Boolean).length;
-      if (score === 10) {
-        totalCleanDays++;
-      }
+    if (isPerfectDay(dStr)) {
+      totalCleanDays++;
     }
   }
 
   // Current Streak
   for (let i = 0; i <= currentDay; i++) {
     const dStr = subDays(today, i).toISOString().split('T')[0];
-    const log = state.dailyLogs[dStr];
     if (i === 0) {
       // Today
-      if (log && Object.values(log.tasks).filter(Boolean).length === 10) {
+      if (isPerfectDay(dStr)) {
         streak++;
       }
     } else {
-      if (log && Object.values(log.tasks).filter(Boolean).length === 10) {
+      if (isPerfectDay(dStr)) {
         streak++;
       } else {
         break; // Streak broken
@@ -58,10 +63,7 @@ export function getStats(state: AppState, todayStr: string) {
       const dStr = subDays(today, i).toISOString().split('T')[0];
       const d = parseISO(dStr);
       if (d >= weekStart && d <= today) {
-          const log = state.dailyLogs[dStr];
-          if (log) {
-            weekSum += Object.values(log.tasks).filter(Boolean).length;
-          }
+          weekSum += getCompletedCount(dStr);
           weekDays++;
       }
   }
