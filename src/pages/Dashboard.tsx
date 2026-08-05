@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '../context/AppContext';
-import { format, subDays } from 'date-fns';
+import { addDays, format, subDays } from 'date-fns';
 import { getStats } from '../lib/stats';
 import { calculateGamification } from '../lib/gamification';
 import { Target, Flame, Activity, CheckCircle, Bell, BellRing, Clock, ShieldCheck, Sparkles, Skull, Dumbbell, Brain, Trophy, TrendingUp, Award } from 'lucide-react';
@@ -53,6 +53,18 @@ export default function Dashboard() {
   const featuredGoals = goalProgress.slice().sort((a, b) => b.percent - a.percent).slice(0, 3);
   const enabledHabits = state.userHabits.filter(habit => habit.enabled);
   const dailyTarget = Math.max(enabledHabits.length, 1);
+  const challengeBoxData = Array.from({ length: 90 }, (_, index) => {
+    const startDate = state.startDate ? new Date(`${state.startDate}T00:00:00`) : new Date();
+    const date = addDays(startDate, index);
+    const key = format(date, 'yyyy-MM-dd');
+    const log = state.dailyLogs[key];
+    const completed = log ? enabledHabits.filter(habit => log.tasks[habit.id]).length : 0;
+    const status = index + 1 < stats.currentDay ? (log ? 'complete' : 'missed') : index + 1 === stats.currentDay ? (log ? 'complete' : 'today') : 'future';
+
+    return { day: index + 1, date: key, completed, status };
+  });
+  const completedChallengeDays = challengeBoxData.filter(day => day.status === 'complete').length;
+  const missedChallengeDays = challengeBoxData.filter(day => day.status === 'missed').length;
   const weekChartData = Array.from({ length: 7 }, (_, index) => {
     const date = subDays(new Date(), 6 - index);
     const key = format(date, 'yyyy-MM-dd');
@@ -156,6 +168,42 @@ export default function Dashboard() {
           </div>
         </div>
 
+
+
+        <div className="rounded-[2rem] border border-brand-green/25 bg-brand-card p-4 space-y-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.24em] text-white"><Target className="h-4 w-4 text-brand-green" /> 90-day battlefield</h3>
+              <p className="mt-1 text-[10px] font-bold uppercase tracking-widest text-brand-muted">Every square is one promised day</p>
+            </div>
+            <span className="rounded-full bg-brand-green/10 border border-brand-green/30 px-3 py-1 text-[10px] font-black text-brand-green">{completedChallengeDays}/90 WON</span>
+          </div>
+          <div className="grid grid-cols-10 gap-1.5" aria-label="90-day challenge grid">
+            {challengeBoxData.map(day => (
+              <div
+                key={day.day}
+                title={`Day ${day.day} · ${day.date} · ${day.status}${day.completed ? ` · ${day.completed} habits` : ''}`}
+                className={cn(
+                  'aspect-square rounded-md border text-[8px] font-black flex items-center justify-center transition-all',
+                  day.status === 'complete' && 'border-brand-green bg-brand-green text-black shadow-[0_0_10px_rgba(57,255,20,0.25)]',
+                  day.status === 'today' && 'border-white bg-white/10 text-white ring-2 ring-brand-green/50',
+                  day.status === 'missed' && 'border-red-500/40 bg-red-500/15 text-red-200',
+                  day.status === 'future' && 'border-white/10 bg-black/50 text-brand-muted'
+                )}
+              >
+                {day.day}
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            {[{ label: 'Won', value: completedChallengeDays, color: 'text-brand-green' }, { label: 'Missed', value: missedChallengeDays, color: 'text-red-300' }, { label: 'Remaining', value: Math.max(90 - completedChallengeDays - missedChallengeDays, 0), color: 'text-white' }].map(item => (
+              <div key={item.label} className="rounded-2xl border border-brand-border bg-black/40 p-2">
+                <div className={cn('text-lg font-black', item.color)}>{item.value}</div>
+                <div className="text-[8px] font-black uppercase tracking-widest text-brand-muted">{item.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="rounded-[2rem] border border-brand-green/25 bg-brand-card p-4 space-y-4 overflow-hidden">
           <div className="flex items-center justify-between">

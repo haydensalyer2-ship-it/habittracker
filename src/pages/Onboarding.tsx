@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { useAppStore } from '../context/AppContext';
-import { Flame, ShieldCheck, Swords, Trophy, Zap } from 'lucide-react';
+import { Flame, LockKeyhole, ShieldCheck, Swords, Trophy, Zap } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 export default function Onboarding() {
   const { startRun } = useAppStore();
   const [selectedLength, setSelectedLength] = useState(90);
+  const [commitmentName, setCommitmentName] = useState('');
+  const [pledgeAccepted, setPledgeAccepted] = useState(false);
+  const canCommit = commitmentName.trim().length >= 2 && pledgeAccepted;
 
   const durations = [
     { days: 30, title: '30-Day Reset', desc: 'Stop the bleeding and prove control.' },
@@ -56,7 +59,7 @@ export default function Onboarding() {
 
         <div className="rounded-3xl border border-brand-border bg-brand-card/95 p-5 space-y-3 shadow-2xl">
           <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.25em] text-brand-green">
-            <Swords className="h-4 w-4" /> Choose your campaign
+            <Swords className="h-4 w-4" /> Step 1 · Set up your challenge
           </h3>
           <div className="grid grid-cols-2 gap-2">
             {durations.map((opt) => (
@@ -80,19 +83,43 @@ export default function Onboarding() {
 
         <div className="rounded-3xl border border-brand-border bg-black p-5 space-y-4">
           <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.25em] text-white">
-            <Trophy className="h-4 w-4 text-brand-green" /> Starting protocol
+            <Trophy className="h-4 w-4 text-brand-green" /> Step 2 · Commit to it
           </h3>
           <div className="space-y-3 text-xs font-bold text-zinc-300">
             <p className="flex gap-3"><ShieldCheck className="h-4 w-4 shrink-0 text-red-400" /> Kill cheap dopamine: porn, doomscrolling, weed, nicotine, gambling, binge food.</p>
             <p className="flex gap-3"><Zap className="h-4 w-4 shrink-0 text-brand-green" /> Build status: training, sleep, steps, protein, reading, skill work, deep work.</p>
           </div>
+          <label className="block space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-[0.24em] text-brand-muted">Your signed commitment</span>
+            <input
+              value={commitmentName}
+              onChange={(event) => setCommitmentName(event.target.value)}
+              placeholder="Type your name"
+              className="w-full rounded-2xl border border-brand-border bg-white/5 px-4 py-3 text-sm font-black text-white outline-none transition-all placeholder:text-brand-muted focus:border-brand-green"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() => setPledgeAccepted((accepted) => !accepted)}
+            className={cn(
+              'flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-all',
+              pledgeAccepted ? 'border-brand-green bg-brand-green/10 text-white' : 'border-brand-border bg-white/[0.03] text-brand-muted'
+            )}
+          >
+            <span className={cn('flex h-5 w-5 shrink-0 items-center justify-center rounded-md border text-[10px] font-black', pledgeAccepted ? 'border-brand-green bg-brand-green text-black' : 'border-white/20')}>{pledgeAccepted ? '✓' : ''}</span>
+            <span className="text-[11px] font-black uppercase leading-5 tracking-wider">I understand this starts today and I am committing to the full {selectedLength}-day campaign.</span>
+          </button>
         </div>
 
         <button
-          onClick={() => startRun(selectedLength)}
-          className="w-full rounded-2xl bg-brand-green py-4 text-xl font-black uppercase tracking-[0.18em] text-black shadow-2xl shadow-brand-green/20 transition-all hover:bg-green-300 active:scale-95"
+          onClick={() => canCommit && startRun(selectedLength)}
+          disabled={!canCommit}
+          className={cn(
+            'w-full rounded-2xl py-4 text-xl font-black uppercase tracking-[0.18em] shadow-2xl transition-all active:scale-95',
+            canCommit ? 'bg-brand-green text-black shadow-brand-green/20 hover:bg-green-300' : 'cursor-not-allowed border border-brand-border bg-white/5 text-brand-muted shadow-none'
+          )}
         >
-          Start {selectedLength}-Day Lock In
+          <span className="inline-flex items-center justify-center gap-2"><LockKeyhole className="h-5 w-5" /> Commit {selectedLength}-Day Lock In</span>
         </button>
       </div>
     </div>
