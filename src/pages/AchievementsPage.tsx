@@ -13,7 +13,7 @@ export default function AchievementsPage() {
 
   const unlockedCount = achievements.filter(a => a.unlocked).length;
 
-  const categories = ['All', 'Discipline', 'Level & XP', 'Focus Time', 'Habits', 'Perfection'];
+  const categories = ['All', 'Goals', 'Discipline', 'Level & XP', 'Focus Time', 'Habits', 'Perfection'];
 
   const filteredAchievements = selectedCategory === 'All'
     ? achievements
@@ -35,7 +35,7 @@ export default function AchievementsPage() {
       <div className="flex justify-between items-end pb-2 border-b border-brand-border">
         <div>
           <h1 className="text-2xl font-black uppercase tracking-tight text-white">Achievements</h1>
-          <p className="text-[10px] text-brand-muted font-bold tracking-widest uppercase">Gamified Greatness Badges</p>
+          <p className="text-[10px] text-brand-muted font-bold tracking-widest uppercase">Personal trophies based on your goals</p>
         </div>
         <span className="text-xs font-black uppercase tracking-widest bg-brand-green/10 text-brand-green border border-brand-green/30 px-3 py-1 rounded-full">
           {unlockedCount} / {achievements.length} Unlocked
@@ -81,6 +81,11 @@ export default function AchievementsPage() {
       </div>
 
       {/* Achievements List */}
+      <div className="rounded-[2rem] border border-brand-green/25 bg-brand-green/10 p-4 space-y-2">
+        <div className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-white"><Sparkles className="h-4 w-4 text-brand-green" /> Goal-tailored reward engine</div>
+        <p className="text-[11px] font-bold leading-relaxed text-brand-muted">Add or update goals to instantly generate milestone badges at 25%, 50%, 75%, and 100% for each target.</p>
+      </div>
+
       <div className="space-y-3">
         {filteredAchievements.map((achievement) => {
           const Icon = achievement.icon;
