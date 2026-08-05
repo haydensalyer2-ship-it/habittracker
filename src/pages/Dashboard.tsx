@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import JourneyMap from '../components/JourneyMap';
 import { requestNotificationPermission, showNotification } from '../lib/notifications';
 import { cn } from '../lib/utils';
+import { getGoalProgressList, getGoalMomentumScore } from '../lib/goalProgress';
 
 const QUOTES = [
   { text: 'Urges are not orders. They are waves. Hold position.', author: 'Lock In Protocol' },
@@ -45,6 +46,9 @@ export default function Dashboard() {
   const todaysLog = state.dailyLogs[todayStr];
   const lockedToday = !!todaysLog;
   const streakMultiplier = stats.streak >= 90 ? '3.0x' : stats.streak >= 60 ? '2.5x' : stats.streak >= 30 ? '2.0x' : stats.streak >= 14 ? '1.5x' : stats.streak >= 7 ? '1.25x' : stats.streak >= 3 ? '1.1x' : '1.0x';
+  const goalProgress = getGoalProgressList(state.customGoals || []);
+  const goalMomentum = getGoalMomentumScore(state.customGoals || []);
+  const featuredGoals = goalProgress.slice().sort((a, b) => b.percent - a.percent).slice(0, 3);
 
   return (
     <div className="min-h-[100dvh] bg-[radial-gradient(circle_at_top,#102819_0%,#070707_45%,#020202_100%)] pb-24">
@@ -126,6 +130,24 @@ export default function Dashboard() {
             <span className="rounded-xl bg-red-500/10 border border-red-500/20 p-2 text-red-200">Doomscrolling</span>
             <span className="rounded-xl bg-red-500/10 border border-red-500/20 p-2 text-red-200">Weed / Nicotine</span>
             <span className="rounded-xl bg-red-500/10 border border-red-500/20 p-2 text-red-200">Gambling / Binge</span>
+          </div>
+        </div>
+
+
+        <div className="rounded-[2rem] border border-brand-green/25 bg-brand-card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.24em] text-white"><Target className="h-4 w-4 text-brand-green" /> Goal scoreboard</h3>
+            <span className="rounded-full bg-brand-green/10 border border-brand-green/30 px-3 py-1 text-[10px] font-black text-brand-green">{goalMomentum}% MOMENTUM</span>
+          </div>
+          <div className="space-y-2">
+            {featuredGoals.length > 0 ? featuredGoals.map(({ goal, percent }) => (
+              <button key={goal.id} onClick={() => navigate('/goals')} className="w-full rounded-2xl border border-brand-border bg-black/40 p-3 text-left">
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest"><span className="text-white truncate pr-2">{goal.title}</span><span className="text-brand-green">{percent}%</span></div>
+                <div className="mt-2 h-2 rounded-full border border-brand-border bg-black overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-brand-green to-pink-400" style={{ width: `${percent}%` }} /></div>
+              </button>
+            )) : (
+              <button onClick={() => navigate('/goals')} className="w-full rounded-2xl border border-dashed border-brand-green/30 bg-brand-green/10 p-4 text-left text-xs font-black uppercase tracking-widest text-brand-green">Add goals to generate custom achievements</button>
+            )}
           </div>
         </div>
 

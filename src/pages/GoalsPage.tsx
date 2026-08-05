@@ -3,6 +3,7 @@ import { useAppStore } from '../context/AppContext';
 import { GoalItem } from '../types';
 import { Target, Plus, Trash2, Edit3, Check, Flame, Trophy, Shield, Dumbbell, DollarSign, Briefcase, BookOpen, Sparkles } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { getGoalProgress, getGoalMomentumScore } from '../lib/goalProgress';
 
 export default function GoalsPage() {
   const { state, updateCustomGoals, startRun, resetApp } = useAppStore();
@@ -15,6 +16,8 @@ export default function GoalsPage() {
   const [category, setCategory] = useState<'fitness' | 'finance' | 'business' | 'mindset' | 'skill'>('fitness');
 
   const goalsList = state.customGoals && state.customGoals.length > 0 ? state.customGoals : [];
+  const momentumScore = getGoalMomentumScore(goalsList);
+  const completedGoals = goalsList.filter(goal => getGoalProgress(goal).isComplete).length;
 
   const handleAddGoal = (e: FormEvent) => {
     e.preventDefault();
@@ -70,6 +73,19 @@ export default function GoalsPage() {
           <Plus className="w-4 h-4" />
           <span>Add Goal</span>
         </button>
+      </div>
+
+      <div className="rounded-[2rem] border border-brand-green/25 bg-brand-green/10 p-5 relative overflow-hidden">
+        <Sparkles className="absolute right-4 top-4 h-5 w-5 text-brand-green" />
+        <p className="text-[10px] font-black uppercase tracking-[0.28em] text-brand-green">Goal Momentum</p>
+        <div className="mt-2 flex items-end justify-between">
+          <div className="text-6xl font-black tracking-tighter text-white">{momentumScore}%</div>
+          <div className="text-right text-[10px] font-black uppercase tracking-widest text-brand-muted">
+            <div>{completedGoals} Complete</div>
+            <div>{goalsList.length} Active Goals</div>
+          </div>
+        </div>
+        <div className="mt-4 h-3 rounded-full border border-brand-border bg-black/50 overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-brand-green to-pink-400" style={{ width: `${momentumScore}%` }} /></div>
       </div>
 
       {/* Challenge Duration Settings Banner */}
@@ -159,6 +175,7 @@ export default function GoalsPage() {
         {goalsList.map((goal) => {
           const CatIcon = getCategoryIcon(goal.category);
           const isEditing = editingId === goal.id;
+          const progress = getGoalProgress(goal);
 
           return (
             <div key={goal.id} className="bg-brand-card border border-brand-border rounded-xl p-4 space-y-3 shadow-lg">
@@ -189,7 +206,13 @@ export default function GoalsPage() {
                 </div>
               </div>
 
-              <div className="bg-black/40 border border-brand-border/60 rounded-lg p-3 flex justify-between items-center text-xs">
+              <div className="bg-black/40 border border-brand-border/60 rounded-lg p-3 space-y-3 text-xs">
+                <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                  <span className="text-brand-green">{progress.percent}% complete</span>
+                  <span className="text-brand-muted">Next badge: {progress.percent >= 100 ? 'Mastered' : `${progress.percent < 25 ? 25 : progress.percent < 50 ? 50 : progress.percent < 75 ? 75 : 100}%`}</span>
+                </div>
+                <div className="h-2.5 rounded-full border border-brand-border bg-black overflow-hidden"><div className="h-full rounded-full bg-gradient-to-r from-cyan-300 via-brand-green to-pink-400" style={{ width: `${progress.percent}%` }} /></div>
+                <div className="flex justify-between items-center">
                 <div>
                   <span className="text-[9px] font-bold text-brand-muted uppercase tracking-widest block">Current Progress</span>
                   {isEditing ? (
@@ -208,6 +231,7 @@ export default function GoalsPage() {
                   <span className="text-[9px] font-bold text-brand-muted uppercase tracking-widest block">Target Goal</span>
                   <span className="font-black text-white text-sm">{goal.target}</span>
                 </div>
+              </div>
               </div>
             </div>
           );

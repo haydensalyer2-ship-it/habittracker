@@ -8,13 +8,14 @@ import {
   Sparkles, Brain, Clock, ShieldCheck, Sword, Compass, CheckCircle2
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { getGoalProgressList, getGoalMomentumScore } from './goalProgress';
 
 export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'diamond' | 'apex';
 
 export interface Achievement {
   id: string;
   title: string;
-  category: 'Discipline' | 'Level & XP' | 'Focus Time' | 'Habits' | 'Perfection';
+  category: 'Goals' | 'Discipline' | 'Level & XP' | 'Focus Time' | 'Habits' | 'Perfection';
   description: string;
   icon: any;
   color: string;
@@ -35,6 +36,79 @@ export function getAchievements(state: AppState): Achievement[] {
 
   const { streak, totalCleanDays, currentDay } = stats;
   const { totalXP, level } = gamification;
+  const goalProgress = getGoalProgressList(state.customGoals || []);
+  const goalMomentum = getGoalMomentumScore(state.customGoals || []);
+  const completedGoals = goalProgress.filter(item => item.isComplete).length;
+
+  const categoryConfig = {
+    fitness: { icon: Dumbbell, color: 'text-orange-400', bgColor: 'bg-orange-500/10', borderColor: 'border-orange-500/20' },
+    finance: { icon: DollarSign, color: 'text-emerald-400', bgColor: 'bg-emerald-500/10', borderColor: 'border-emerald-500/20' },
+    business: { icon: Rocket, color: 'text-cyan-400', bgColor: 'bg-cyan-500/10', borderColor: 'border-cyan-500/20' },
+    mindset: { icon: Brain, color: 'text-purple-400', bgColor: 'bg-purple-500/10', borderColor: 'border-purple-500/20' },
+    skill: { icon: BookOpen, color: 'text-blue-400', bgColor: 'bg-blue-500/10', borderColor: 'border-blue-500/20' },
+  } as const;
+
+  const goalAchievements: Achievement[] = [
+    {
+      id: 'goals_first_target',
+      title: 'Vision Loaded',
+      category: 'Goals',
+      description: 'Create your first personal goal so the app can tailor achievements around your actual target.',
+      icon: Target,
+      color: 'text-brand-green',
+      bgColor: 'bg-brand-green/10',
+      borderColor: 'border-brand-green/20',
+      unlocked: goalProgress.length > 0,
+      tier: 'bronze',
+      progressText: `${Math.min(goalProgress.length, 1)} / 1 Goal`,
+      xpReward: 100
+    },
+    {
+      id: 'goals_momentum_50',
+      title: 'Halfway Heat',
+      category: 'Goals',
+      description: 'Average 50% progress across your active goals.',
+      icon: Sparkles,
+      color: 'text-pink-400',
+      bgColor: 'bg-pink-500/10',
+      borderColor: 'border-pink-500/20',
+      unlocked: goalMomentum >= 50,
+      tier: 'silver',
+      progressText: `${goalMomentum} / 50% Momentum`,
+      xpReward: 450
+    },
+    {
+      id: 'goals_completed_1',
+      title: 'Target Destroyed',
+      category: 'Goals',
+      description: 'Complete any personal goal and prove the scoreboard is real.',
+      icon: Trophy,
+      color: 'text-yellow-400',
+      bgColor: 'bg-yellow-400/10',
+      borderColor: 'border-yellow-400/30',
+      unlocked: completedGoals >= 1,
+      tier: 'gold',
+      progressText: `${completedGoals} / 1 Complete`,
+      xpReward: 1000
+    },
+    ...goalProgress.flatMap(({ goal, percent }) => {
+      const config = categoryConfig[goal.category] || categoryConfig.skill;
+      return [25, 50, 75, 100].map((milestone) => ({
+        id: `goal_${goal.id}_${milestone}`,
+        title: `${milestone}% · ${goal.title}`,
+        category: 'Goals' as const,
+        description: `Tailored badge for pushing “${goal.title}” toward ${goal.target}.`,
+        icon: milestone === 100 ? Crown : config.icon,
+        color: milestone === 100 ? 'text-yellow-400' : config.color,
+        bgColor: milestone === 100 ? 'bg-yellow-400/10' : config.bgColor,
+        borderColor: milestone === 100 ? 'border-yellow-400/30' : config.borderColor,
+        unlocked: percent >= milestone,
+        tier: milestone === 100 ? 'diamond' as const : milestone >= 75 ? 'gold' as const : milestone >= 50 ? 'silver' as const : 'bronze' as const,
+        progressText: `${Math.min(percent, milestone)} / ${milestone}%`,
+        xpReward: milestone * 10
+      }));
+    })
+  ];
 
   // Calculate stats from logs
   let totalGymDays = 0;
@@ -73,6 +147,8 @@ export function getAchievements(state: AppState): Achievement[] {
   const totalFocusHours = Math.floor(totalFocusMinutes / 60);
 
   return [
+    ...goalAchievements,
+
     // --- DISCIPLINE & STREAKS ---
     {
       id: 'streak_3',
