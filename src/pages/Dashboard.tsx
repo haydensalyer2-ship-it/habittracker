@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '../context/AppContext';
-import { format } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { getStats } from '../lib/stats';
 import { calculateGamification } from '../lib/gamification';
-import { Target, Flame, Activity, CheckCircle, Bell, BellRing, Clock, ShieldCheck, Sparkles, Skull, Dumbbell, Brain } from 'lucide-react';
+import { Target, Flame, Activity, CheckCircle, Bell, BellRing, Clock, ShieldCheck, Sparkles, Skull, Dumbbell, Brain, Trophy, TrendingUp, Award } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import JourneyMap from '../components/JourneyMap';
 import { requestNotificationPermission, showNotification } from '../lib/notifications';
 import { cn } from '../lib/utils';
 import { getGoalProgressList, getGoalMomentumScore } from '../lib/goalProgress';
+import { getAchievements } from '../lib/achievements';
+import { Area, AreaChart, Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 
 const QUOTES = [
   { text: 'Urges are not orders. They are waves. Hold position.', author: 'Lock In Protocol' },
@@ -49,6 +51,27 @@ export default function Dashboard() {
   const goalProgress = getGoalProgressList(state.customGoals || []);
   const goalMomentum = getGoalMomentumScore(state.customGoals || []);
   const featuredGoals = goalProgress.slice().sort((a, b) => b.percent - a.percent).slice(0, 3);
+  const enabledHabits = state.userHabits.filter(habit => habit.enabled);
+  const dailyTarget = Math.max(enabledHabits.length, 1);
+  const weekChartData = Array.from({ length: 7 }, (_, index) => {
+    const date = subDays(new Date(), 6 - index);
+    const key = format(date, 'yyyy-MM-dd');
+    const log = state.dailyLogs[key];
+    const completed = log ? enabledHabits.filter(habit => log.tasks[habit.id]).length : 0;
+    const clean = log ? Math.round((completed / dailyTarget) * 100) : 0;
+
+    return {
+      day: format(date, 'EEE'),
+      score: completed,
+      clean,
+    };
+  });
+  const achievements = getAchievements(state);
+  const unlockedAchievements = achievements.filter(achievement => achievement.unlocked);
+  const nextAchievements = achievements.filter(achievement => !achievement.unlocked).slice(0, 3);
+  const achievementPercent = achievements.length ? Math.round((unlockedAchievements.length / achievements.length) * 100) : 0;
+  const maxStreakRing = Math.max(challengeLength, 1);
+  const ringOffset = 283 - (Math.min(stats.streak, maxStreakRing) / maxStreakRing) * 283;
 
   return (
     <div className="min-h-[100dvh] bg-[radial-gradient(circle_at_top,#102819_0%,#070707_45%,#020202_100%)] pb-24">
@@ -133,6 +156,74 @@ export default function Dashboard() {
           </div>
         </div>
 
+
+        <div className="rounded-[2rem] border border-brand-green/25 bg-brand-card p-4 space-y-4 overflow-hidden">
+          <div className="flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.24em] text-white"><TrendingUp className="h-4 w-4 text-brand-green" /> 7-day execution chart</h3>
+            <span className="text-[10px] font-black uppercase tracking-widest text-brand-muted">Target {dailyTarget}/day</span>
+          </div>
+          <div className="grid grid-cols-[0.8fr_1.2fr] gap-3 items-center">
+            <div className="relative mx-auto h-32 w-32">
+              <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#39ff14" strokeWidth="8" strokeLinecap="round" strokeDasharray="283" strokeDashoffset={ringOffset} />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <span className="text-3xl font-black leading-none">{Math.round(progress)}%</span>
+                <span className="text-[9px] font-black uppercase tracking-widest text-brand-green">Challenge</span>
+              </div>
+            </div>
+            <div className="h-36 min-w-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={weekChartData} margin={{ top: 8, right: 0, left: -26, bottom: 0 }}>
+                  <defs><linearGradient id="scoreGlow" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#39ff14" stopOpacity={0.8}/><stop offset="95%" stopColor="#39ff14" stopOpacity={0}/></linearGradient></defs>
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fill: '#8b8b8b', fontSize: 9, fontWeight: 900 }} />
+                  <YAxis hide domain={[0, dailyTarget]} />
+                  <Tooltip cursor={{ stroke: '#39ff14', strokeOpacity: 0.25 }} contentStyle={{ background: '#050505', border: '1px solid rgba(57,255,20,0.25)', borderRadius: 16, color: '#fff', fontSize: 11, fontWeight: 800 }} />
+                  <Area type="monotone" dataKey="score" stroke="#39ff14" strokeWidth={3} fill="url(#scoreGlow)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="h-20">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={weekChartData} margin={{ top: 4, right: 0, left: 0, bottom: 0 }}>
+                <XAxis dataKey="day" hide />
+                <YAxis hide domain={[0, 100]} />
+                <Bar dataKey="clean" radius={[8, 8, 8, 8]} fill="#39ff14" background={{ fill: 'rgba(255,255,255,0.06)', radius: 8 }} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="rounded-[2rem] border border-yellow-400/25 bg-brand-card p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.24em] text-white"><Trophy className="h-4 w-4 text-yellow-400" /> Achievement radar</h3>
+            <span className="rounded-full bg-yellow-400/10 border border-yellow-400/30 px-3 py-1 text-[10px] font-black text-yellow-300">{achievementPercent}% UNLOCKED</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {[{ label: 'Unlocked', value: unlockedAchievements.length }, { label: 'Available', value: achievements.length }, { label: 'Next Up', value: nextAchievements.length }].map(item => (
+              <div key={item.label} className="rounded-2xl border border-brand-border bg-black/40 p-3 text-center">
+                <div className="text-2xl font-black">{item.value}</div>
+                <div className="text-[9px] font-black uppercase tracking-widest text-brand-muted">{item.label}</div>
+              </div>
+            ))}
+          </div>
+          <div className="space-y-2">
+            {nextAchievements.map(achievement => {
+              const Icon = achievement.icon || Award;
+              return (
+                <button key={achievement.id} onClick={() => navigate('/achievements')} className="w-full rounded-2xl border border-brand-border bg-black/40 p-3 text-left flex items-center gap-3">
+                  <div className={cn('h-10 w-10 rounded-xl border flex items-center justify-center', achievement.bgColor, achievement.borderColor)}><Icon className={cn('h-5 w-5', achievement.color)} /></div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex justify-between gap-2 text-[10px] font-black uppercase tracking-widest"><span className="truncate text-white">{achievement.title}</span><span className="shrink-0 text-yellow-300">+{achievement.xpReward} XP</span></div>
+                    <p className="mt-1 truncate text-[10px] font-bold text-brand-muted">{achievement.progressText || achievement.description}</p>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="rounded-[2rem] border border-brand-green/25 bg-brand-card p-4 space-y-3">
           <div className="flex items-center justify-between">
